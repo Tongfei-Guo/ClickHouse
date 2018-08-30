@@ -34,7 +34,7 @@ void ITableDeclaration::setColumns(ColumnsDescription columns_)
 
 bool ITableDeclaration::hasColumn(const String & column_name) const
 {
-    return getColumns().hasPhysical(column_name); /// By default, we assume that there are no virtual columns in the storage.
+    return getColumns().hasPhysical(column_name); /// By default, we assume that there are no virtual columns in the storage. Why call a virtual funciton while columns can be accessed directly?
 }
 
 NameAndTypePair ITableDeclaration::getColumn(const String & column_name) const

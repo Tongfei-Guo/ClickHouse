@@ -118,7 +118,7 @@ public:
     {
         MutablePtr res = cloneEmpty();
         res->insertRangeFrom(*this, start, length);
-        return std::move(res);
+        return std::move(res);//return is auto-moved, right?
     }
 
     /// Appends new value at the end of column (column's size is increased by 1).

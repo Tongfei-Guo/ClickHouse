@@ -8,7 +8,7 @@ namespace DB
 
 ColumnDefaultKind columnDefaultKindFromString(const std::string & str)
 {
-    static const std::unordered_map<std::string, ColumnDefaultKind> map{
+    static const std::unordered_map<std::string, ColumnDefaultKind> map{ //try map instead of unordered_map?
         { "DEFAULT", ColumnDefaultKind::Default },
         { "MATERIALIZED", ColumnDefaultKind::Materialized },
         { "ALIAS", ColumnDefaultKind::Alias }

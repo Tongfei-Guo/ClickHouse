@@ -121,11 +121,11 @@ protected:
 
         /// Initializing from temporary of compatible type.
         template <typename U>
-        mutable_ptr(mutable_ptr<U> && other) : Base(std::move(other)) {}
+        mutable_ptr(mutable_ptr<U> && other) : Base(std::move(other)) {} //no checking for type compatibility?
 
         mutable_ptr() = default;
 
-        mutable_ptr(const std::nullptr_t *) {}
+        mutable_ptr(const std::nullptr_t *) {} // should be const std::nullptr_t?
     };
 
 public:
@@ -233,7 +233,7 @@ class COWPtrHelper : public Base
 {
 private:
     Derived * derived() { return static_cast<Derived *>(this); }
-    const Derived * derived() const { return static_cast<const Derived *>(this); }
+    const Derived * derived() const { return static_cast<const Derived *>(this); } // const_cast?
 
 public:
     using Ptr = typename Base::template immutable_ptr<Derived>;
