@@ -1,0 +1,14 @@
+Up to now:
+1. install and run clickhouse
+2. run ontime test example on data from year 1987 and 1988, around 1 mil data points.
+
+Plan:
+1. read source code of clickhouse. Understanding the whole process from parser, interpreter to llvm, etc.
+direction: i). find short blogs on postgres source code which helps to analyse the implementation of database in general. ii). find some reference on 
+database theory, but clickhouse is OLAP database, which is vastly different from traditional OLTP database, so it might not help too much to dive into 
+traditional database implementation. Advice is to read source code of clickhouse directly.
+2. try build clickhouse from source.
+3.Postgres source code reading,
+4. neo4j (graph database?)
+5. Impala (distributed database, for optimization).
+6. run other OLTP benchmark like tpcds and tpch to see what advantage clickhouse has and dig into code from there (medium priority)
