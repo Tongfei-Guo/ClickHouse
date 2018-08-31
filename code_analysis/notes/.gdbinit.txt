@@ -1,0 +1,105 @@
+b 172
+run --config-file=/etc/clickhouse-server/config.xml
+s 6
+n 2
+s
+n 4
+s 2
+n 2
+# point 1 : goes into DB::Server::initialize (this=0x7fffffffdf10, self=...) at ../dbms/programs/server/Server.cpp:80 to reduce thread to 1.
+s 5
+finish
+s 4
+n 2
+s
+finish
+s
+finish
+s
+set var minCapacity = 1
+set var maxCapacity = 1
+# at this point, a new thread is about to start (used to be 2 threads)
+finish
+finish
+finish
+n 2
+b 1076
+finish
+# at this point, a new thread is about to start
+finish
+finish
+# continue at point 1.
+n
+s
+b 304
+finish
+# at this point, 8 threads are about to start to load metadata (by "loadMetadata(*global_context)), and these 8 threads will stop after.
+b 336
+finish
+# at this point, 1 thread is about to start (used to be 16) as BackgrroundProcessPool
+set var (*global_context).settings.background_pool_size.value = 1
+set var (*global_context).settings.background_schedule_pool_size.value = 1
+b 342
+finish
+set $debug_i = 0
+while ($debug_i != 3)
+    s
+    finish
+    set $debug_i = $debug_i+1
+end
+s 2
+set var minCapacity = 1
+set var maxCapacity = 1
+n 8
+# at this point 1 thread is about to start (used to be 3) as .
+n
+# the following code set listening port on server to be 1 thread (marked with *), used to be 6.
+#<Information> Application: Listening http://[::1]:8123
+#<Information> Application: Listening tcp: [::1]:9000
+#<Information> Application: Listening interserver http: [::1]:9009
+#<Information> Application: Listening http://127.0.0.1:8123
+#<Information> Application: Listening tcp: 127.0.0.1:9000 (*)
+#<Information> Application: Listening interserver http: 127.0.0.1:9009
+finish
+b 353
+finish
+tbreak +1
+jump +1
+b 412
+finish
+tbreak 451
+jump 451
+b 466
+continue
+tbreak 491
+jump 491
+# it seems line 493 - 506 (Interserver IO HTTP) cannot be skipped, otherwise it will catch a seg fault at line 508
+b 525
+continue
+b 527
+continue
+# a ConfigReloader is about to start (main_config_reloader)
+n
+# a ConfigReloader is about to start (users_config_reloader)
+n
+b 599
+# a thread "AsyncMetrics" is about to start
+continue
+b 609
+continue
+# a thread "HTTPSessionclea" is about to start
+finish
+detach
+# sample threads
+# Id   Target Id         Frame
+# 1    Thread 0x7ffff7fdbdc0 (LWP 5378) "clickhouse-serv" 0x00007ffff79bb9f3 in futex_wait_cancelable (private=<optimized out>, expected=0, futex_word=0x7fffffffe238) at ../sysdeps/unix/sysv/linux/futex-internal.h:88
+# 2    Thread 0x7ffff67d8700 (LWP 5382) "clickhouse-serv" 0x00007ffff79bb9f3 in futex_wait_cancelable (private=<optimized out>, expected=0, futex_word=0x115e0140) at ../sysdeps/unix/sysv/linux/futex-internal.h:88
+# 3    Thread 0x7ffff5fd7700 (LWP 5383) "clickhouse-serv" 0x00007ffff79bf384 in __libc_read (fd=3, buf=0x7ffff5fd32b0, nbytes=1072) at ../sysdeps/unix/sysv/linux/read.c:27
+# 4    Thread 0x7ffff1fcf700 (LWP 5392) "BackgrProcPool" 0x00007ffff79bbf85 in futex_abstimed_wait_cancelable (private=<optimized out>, abstime=0x7ffff1fcb5b0, expected=0, futex_word=0x115c80b8) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+# 5    Thread 0x7ffff27d0700 (LWP 5393) "clickhouse-serv" 0x00007ffff713cbb7 in epoll_wait (epfd=13, events=0x7ffff27cb594, maxevents=1, timeout=10000) at ../sysdeps/unix/sysv/linux/epoll_wait.c:30
+# 6    Thread 0x7ffff2fd1700 (LWP 5394) "clickhouse-serv" 0x00007ffff713cbb7 in epoll_wait (epfd=12, events=0x7ffff2fcd5e4, maxevents=1, timeout=250) at ../sysdeps/unix/sysv/linux/epoll_wait.c:30
+# 7    Thread 0x7ffff37d2700 (LWP 5395) "clickhouse-serv" 0x00007ffff713cbb7 in epoll_wait (epfd=11, events=0x7ffff37ce5e4, maxevents=1, timeout=250) at ../sysdeps/unix/sysv/linux/epoll_wait.c:30
+# 8    Thread 0x7ffff57d6700 (LWP 5396) "ConfigReloader" 0x00007ffff79bbf85 in futex_abstimed_wait_cancelable (private=<optimized out>, abstime=0x7ffff57d2590, expected=0, futex_word=0x1154e498) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+# 9    Thread 0x7ffff4fd5700 (LWP 5397) "ConfigReloader" 0x00007ffff79bbf85 in futex_abstimed_wait_cancelable (private=<optimized out>, abstime=0x7ffff4fd1590, expected=0, futex_word=0x1154e1f8) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+# 10   Thread 0x7ffff47d4700 (LWP 5398) "AsyncMetrics" 0x00007ffff79bbf85 in futex_abstimed_wait_cancelable (private=<optimized out>, abstime=0x7ffff47d0690, expected=0, futex_word=0x7fffffffd140) at ../sysdeps/unix/sysv/linux/futex-internal.h:205
+# 11   Thread 0x7ffff3fd3700 (LWP 5399) "HTTPSessionClea" 0x00007ffff79bbf85 in futex_abstimed_wait_cancelable (private=<optimized out>, abstime=0x7ffff3fcf650, expected=0, futex_word=0x7fffffffcfa8) at ../sysdeps/unix/sysv/linux/futex-internal.h:205

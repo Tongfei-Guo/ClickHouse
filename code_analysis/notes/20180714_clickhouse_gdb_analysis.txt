@@ -1,0 +1,13 @@
+II. 配合gdb进行源码解读
+参照在非gdb下运行server后，可通过gdb clickhouse-server -p pid来进入gdb. 
+gdb多线程tutorial : https://cloud.tencent.com/developer/article/1142947
+
+clickhouse-server默认会开启大约30个线程，其中有一些重复线程（用于做类似的工作，例如threadpool），为了便于代码分析，根据如下操作，可将这些重复的线程全部设置为1：
+1. 将附件中的.gdbinit放置于clickhouse-server同一路径下，运行gdb clickhouse-server（.gdbinit中有注释解释对应线程的位置，可阅读后自行更改）。
+2. 根据提示按回车，到最后出现
+“Include not found: clickhouse_remote_servers
+Include not found: clickhouse_compression”
+后ctrl+c,然后quit
+3. 用gdb clickhouse-server -p pid重新attach进入gdb, 若要重现freemind中thread 5 thread 6的观察结果，可根据hardware_watch_pTarget来打一个断点，之后在client端“./clickhouse-client”发送请求，然后切入到thread 6,一直next直到断点触发，然后切入到thread 5。
+
+对clickhouse-server主线server.cpp的stack的演化见ClickhouseFlow.mm 和各个线程的分析见ClickhouseThreads.mm.

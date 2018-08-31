@@ -1,0 +1,7 @@
+I.clickhouse编译，尝试clickhouse stable版本编译未通过。编译commit：15dd80a913b03da44150afa93e957131c0c7a710 通过，环境为Ubuntu18.04, 编译器为(g++-7, clang++-6.0均可），编译方法参照 
+link1. https://blog.csdn.net/wusihang9/article/details/77619735
+link2. https://clickhouse.yandex/docs/en/development/build/
+方法如下：
+1. pull github repo
+2. 用这个cmake指令：cmake -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=gcc-8 -DCMAKE_CXX_COMPILER=g++-8 -DUSE_INTERNAL_BOOST_LIBRARY=1 -DENABLE_EMBEDDED_COMPILER=0 -DUSE_INTERNAL_LLVM_LIBRARY=1
+3. 参照link1复制config文件以及server运行
